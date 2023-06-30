@@ -83,6 +83,10 @@ type ServerConfig struct {
 	// attempts are unlimited. If set to zero, the number of attempts are limited
 	// to 6.
 	MaxAuthTries int
+	// NextAuthMethodsCallback if non-nil, is called when auth methods
+	// return PartialSuccess error, then these methods will be
+	// methods auth can continue
+	NextAuthMethodsCallback func(conn ConnMetadata) []string
 
 	// PasswordCallback, if non-nil, is called when a user
 	// attempts to authenticate using a password.
@@ -151,6 +155,11 @@ type cachedPubKey struct {
 }
 
 const maxCachedPubKeys = 16
+
+// ErrPartialSuccess is the error some auth method partially successful
+// but need more auth method confirm, If return, then config.NextAuthMethodsCallback
+// will be call, and check it
+var ErrPartialSuccess = errors.New("authenticated with partial success")
 
 // pubKeyCache caches tests for public keys.  Since SSH clients
 // will query whether a public key is acceptable before attempting to
