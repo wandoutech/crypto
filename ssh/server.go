@@ -107,6 +107,11 @@ type ServerConfig struct {
 	// unknown.
 	KeyboardInteractiveCallback func(conn ConnMetadata, client KeyboardInteractiveChallenge) (*Permissions, error)
 
+	// NextAuthMethodsCallback if non-nil, is called when auth methods
+	// return PartialSuccess error, then these methods will be
+	// methods auth can continue
+	NextAuthMethodsCallback func(conn ConnMetadata) []string
+
 	// AuthLogCallback, if non-nil, is called to log all authentication
 	// attempts.
 	AuthLogCallback func(conn ConnMetadata, method string, err error)
@@ -151,6 +156,8 @@ type cachedPubKey struct {
 }
 
 const maxCachedPubKeys = 16
+
+var ErrPartialSuccess = errors.New("authenticated with partial success")
 
 // pubKeyCache caches tests for public keys.  Since SSH clients
 // will query whether a public key is acceptable before attempting to
